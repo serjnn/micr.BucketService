@@ -29,9 +29,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -93,35 +91,36 @@ class BucketServiceTest {
     }
 
     @Test
-    void restore_shouldRestoreBucketItems() {
-        OrderDTO orderDTO = new OrderDTO(UUID.randomUUID(), 1L, List.of(new BucketItemDTO(1L, "item", 1, BigDecimal.ONE)), BigDecimal.ONE);
+    void restore_shouldRestoreBucketItemsWithBatch() {
+        List<BucketItemDTO> items = List.of(new BucketItemDTO(1L, "item", 1, BigDecimal.ONE));
+        OrderDTO orderDTO = new OrderDTO(UUID.randomUUID(), 1L, items, BigDecimal.ONE);
         when(bucketRepository.findBucketByClientId(1L)).thenReturn(Optional.of(bucket));
 
         bucketService.restore(orderDTO);
 
-        verify(bucketItemRepository, times(1)).addProduct(bucket.id(), 1L, 1);
+        verify(bucketItemRepository, times(1)).batchInsert(bucket.id(), items);
     }
 
     @Test
     void addProduct_shouldIncreaseQuantityForExistingProduct() {
         when(bucketRepository.findBucketByClientId(1L)).thenReturn(Optional.of(bucket));
         BucketItem existingItem = new BucketItem(1L, 1L, 1L, 1);
-        when(bucketItemRepository.findAllByBucketId(bucket.id())).thenReturn(List.of(existingItem));
+        when(bucketItemRepository.findByBucketIdAndProductId(bucket.id(), 1L)).thenReturn(Optional.of(existingItem));
 
         bucketService.addProduct(1L, 1L);
 
-        verify(bucketItemRepository, times(1)).deleteProduct(bucket.id(), 1L);
-        verify(bucketItemRepository, times(1)).addProduct(bucket.id(), 1L, 2);
+        verify(bucketItemRepository, times(1)).updateQuantity(bucket.id(), 1L, 2);
+        verify(bucketItemRepository, never()).addProduct(anyLong(), anyLong(), anyInt());
     }
 
     @Test
     void addProduct_shouldAddNewProduct() {
         when(bucketRepository.findBucketByClientId(1L)).thenReturn(Optional.of(bucket));
-        when(bucketItemRepository.findAllByBucketId(bucket.id())).thenReturn(Collections.emptyList());
+        when(bucketItemRepository.findByBucketIdAndProductId(bucket.id(), 1L)).thenReturn(Optional.empty());
 
         bucketService.addProduct(1L, 1L);
 
-        verify(bucketItemRepository, never()).deleteProduct(anyLong(), anyLong());
+        verify(bucketItemRepository, never()).updateQuantity(anyLong(), anyLong(), (int) anyLong());
         verify(bucketItemRepository, times(1)).addProduct(bucket.id(), 1L, 1);
     }
 
@@ -129,24 +128,24 @@ class BucketServiceTest {
     void removeProductFromBucket_shouldDecreaseQuantity() {
         when(bucketRepository.findBucketByClientId(1L)).thenReturn(Optional.of(bucket));
         BucketItem existingItem = new BucketItem(1L, 1L, 1L, 2);
-        when(bucketItemRepository.findAllByBucketId(bucket.id())).thenReturn(List.of(existingItem));
+        when(bucketItemRepository.findByBucketIdAndProductId(bucket.id(), 1L)).thenReturn(Optional.of(existingItem));
 
         bucketService.removeProductFromBucket(1L, 1L);
 
-        verify(bucketItemRepository, times(1)).deleteProduct(bucket.id(), 1L);
-        verify(bucketItemRepository, times(1)).addProduct(bucket.id(), 1L, 1);
+        verify(bucketItemRepository, never()).deleteProduct(bucket.id(), 1L);
+        verify(bucketItemRepository, times(1)).updateQuantity(bucket.id(), 1L, 1);
     }
 
     @Test
     void removeProductFromBucket_shouldRemoveProductWhenQuantityIsOne() {
         when(bucketRepository.findBucketByClientId(1L)).thenReturn(Optional.of(bucket));
         BucketItem existingItem = new BucketItem(1L, 1L, 1L, 1);
-        when(bucketItemRepository.findAllByBucketId(bucket.id())).thenReturn(List.of(existingItem));
+        when(bucketItemRepository.findByBucketIdAndProductId(bucket.id(), 1L)).thenReturn(Optional.of(existingItem));
 
         bucketService.removeProductFromBucket(1L, 1L);
 
         verify(bucketItemRepository, times(1)).deleteProduct(bucket.id(), 1L);
-        verify(bucketItemRepository, never()).addProduct(anyLong(), anyLong(), (int) anyLong());
+        verify(bucketItemRepository, never()).updateQuantity(anyLong(), anyLong(), (int) anyLong());
     }
 
     @Test

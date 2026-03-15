@@ -4,8 +4,11 @@ import com.serjnn.BucketService.dtos.Bucket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.Optional;
 
 @Repository
@@ -20,7 +23,18 @@ public class BucketRepository {
                 .stream().findFirst();
     }
 
-    public void createBucket(long clientId) {
-        jdbcTemplate.update("INSERT INTO bucket (client_id) VALUES (?)", clientId);
+    public Bucket createBucket(long clientId) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    "INSERT INTO bucket (client_id) VALUES (?)",
+                    new String[]{"id"}
+            );
+            ps.setLong(1, clientId);
+            return ps;
+        }, keyHolder);
+
+        long generatedId = keyHolder.getKey().longValue();
+        return new Bucket(generatedId, clientId);
     }
 }

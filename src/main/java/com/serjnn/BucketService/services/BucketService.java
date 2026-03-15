@@ -71,22 +71,16 @@ public class BucketService {
     }
 
     private Bucket findOrCreateBucket(long clientId) {
-        Bucket bucket;
         Optional<Bucket> existingBucket = bucketRepository.findBucketByClientId(clientId);
-        if (existingBucket.isPresent()) {
-            return existingBucket.get();
-        } else {
-            bucketRepository.createBucket(clientId);
-            return bucketRepository.findBucketByClientId(clientId).orElseThrow();
-        }
-    } // todo make rep return saved bucke not to ask for it
+        return existingBucket.orElseGet(() -> bucketRepository.createBucket(clientId));
+    }
 
     public void restore(OrderDTO orderDTO) {
         Bucket bucket = findOrCreateBucket(orderDTO.clientId());
-        orderDTO.items().forEach(item -> {
-            bucketItemRepository.addProduct(bucket.id(), item.id(), item.quantity());
-        });
-    } //todo use batching so that we dont save smth in cycle
+        if (orderDTO.items() != null && !orderDTO.items().isEmpty()) {
+            bucketItemRepository.batchInsert(bucket.id(), orderDTO.items());
+        }
+    }
 
     public void addProduct(long clientId, long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
