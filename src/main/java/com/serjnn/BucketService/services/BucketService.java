@@ -71,33 +71,30 @@ public class BucketService {
     }
 
     private Bucket findOrCreateBucket(long clientId) {
-        Optional<Bucket> bucket = bucketRepository.findBucketByClientId(clientId);
-        if (bucket.isPresent()) {
-            return bucket.get();
+        Bucket bucket;
+        Optional<Bucket> existingBucket = bucketRepository.findBucketByClientId(clientId);
+        if (existingBucket.isPresent()) {
+            return existingBucket.get();
         } else {
             bucketRepository.createBucket(clientId);
             return bucketRepository.findBucketByClientId(clientId).orElseThrow();
         }
-    }
+    } // todo make rep return saved bucke not to ask for it
 
     public void restore(OrderDTO orderDTO) {
         Bucket bucket = findOrCreateBucket(orderDTO.clientId());
         orderDTO.items().forEach(item -> {
             bucketItemRepository.addProduct(bucket.id(), item.id(), item.quantity());
         });
-    } //todo batch
+    } //todo use batching so that we dont save smth in cycle
 
     public void addProduct(long clientId, long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
-        List<BucketItem> items = bucketItemRepository.findAllByBucketId(bucket.id());
-        Optional<BucketItem> existingItem = items.stream()
-                .filter(item -> item.productId() == productId)
-                .findFirst();
+        Optional<BucketItem> existingItem = bucketItemRepository.findByBucketIdAndProductId(bucket.id(), productId);
 
         if (existingItem.isPresent()) {
             BucketItem item = existingItem.get();
-            bucketItemRepository.deleteProduct(bucket.id(), productId);
-            bucketItemRepository.addProduct(bucket.id(), productId, item.quantity() + 1);
+            bucketItemRepository.updateQuantity(bucket.id(), productId, item.quantity() + 1);
         } else {
             bucketItemRepository.addProduct(bucket.id(), productId, 1);
         }
@@ -105,16 +102,14 @@ public class BucketService {
 
     public void removeProductFromBucket(long clientId, long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
-        List<BucketItem> items = bucketItemRepository.findAllByBucketId(bucket.id());
-        Optional<BucketItem> existingItem = items.stream()
-                .filter(item -> item.productId() == productId)
-                .findFirst();
+        Optional<BucketItem> existingItem = bucketItemRepository.findByBucketIdAndProductId(bucket.id(), productId);
 
         if (existingItem.isPresent()) {
             BucketItem item = existingItem.get();
-            bucketItemRepository.deleteProduct(bucket.id(), productId);
             if (item.quantity() > 1) {
-                bucketItemRepository.addProduct(bucket.id(), productId, item.quantity() - 1);
+                bucketItemRepository.updateQuantity(bucket.id(), productId, item.quantity() - 1);
+            } else {
+                bucketItemRepository.deleteProduct(bucket.id(), productId);
             }
         }
     }
