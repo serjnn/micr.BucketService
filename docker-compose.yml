@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432" # Expose port to host machine for debugging
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data2
 
 volumes:
-  postgres_data: # This named volume will persist your database data
+  postgres_data: {}# This named volume will persist your database data

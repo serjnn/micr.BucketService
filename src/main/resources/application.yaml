@@ -9,4 +9,11 @@ spring:
     name: Bucket
 
 server:
-  port: 7001
+  port: 7000
+
+
+
+flyway:
+  locations: classpath:db/migration
+  enabled: true
+  baseline-on-migrate: true
