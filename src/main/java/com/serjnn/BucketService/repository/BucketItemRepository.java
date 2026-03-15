@@ -3,7 +3,7 @@ package com.serjnn.BucketService.repository;
 import com.serjnn.BucketService.dtos.BucketItem;
 import com.serjnn.BucketService.dtos.BucketItemDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -17,11 +17,11 @@ public class BucketItemRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public List<BucketItem> findAllByBucketId(Long bucketId) {
-        return jdbcTemplate.query("SELECT * FROM bucket_item WHERE bucket_id = ?", new BeanPropertyRowMapper<>(BucketItem.class), bucketId);
+        return jdbcTemplate.query("SELECT * FROM bucket_item WHERE bucket_id = ?", new DataClassRowMapper<>(BucketItem.class), bucketId);
     }
 
     public Optional<BucketItem> findByBucketIdAndProductId(Long bucketId, Long productId) {
-        return jdbcTemplate.query("SELECT * FROM bucket_item WHERE bucket_id = ? AND product_id = ?", new BeanPropertyRowMapper<>(BucketItem.class), bucketId, productId)
+        return jdbcTemplate.query("SELECT * FROM bucket_item WHERE bucket_id = ? AND product_id = ?", new DataClassRowMapper<>(BucketItem.class), bucketId, productId)
                 .stream().findFirst();
     }
 

@@ -1,12 +1,12 @@
 package com.serjnn.BucketService.dtos;
 
 public record BucketItem(
-    long id,
-    long bucketId,
-    long productId,
-    int quantity
+    Long id,
+    Long bucketId,
+    Long productId,
+    Integer quantity
 ) {
-    public BucketItem(long bucketId, long productId, int quantity) {
+    public BucketItem(Long bucketId, Long productId, Integer quantity) {
         this(0L, bucketId, productId, quantity);
     }
 }
