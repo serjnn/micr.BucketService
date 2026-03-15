@@ -1,4 +1,4 @@
-package com.serjnn.BucketService.models;
+package com.serjnn.BucketService.dtos;
 
 public record BucketItem(
     long id,

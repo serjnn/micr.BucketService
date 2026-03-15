@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: micr-synch  # From application.yaml
+      POSTGRES_USER: qwe          # From application.yaml
+      POSTGRES_PASSWORD: qwe      # From application.yaml
+    ports:
+      - "5432:5432" # Expose port to host machine for debugging
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data: # This named volume will persist your database data

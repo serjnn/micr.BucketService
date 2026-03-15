@@ -3,8 +3,8 @@ package com.serjnn.BucketService.services;
 import com.serjnn.BucketService.dtos.CompleteProduct;
 import com.serjnn.BucketService.dtos.OrderDTO;
 import com.serjnn.BucketService.dtos.ProductDto;
-import com.serjnn.BucketService.models.Bucket;
-import com.serjnn.BucketService.models.BucketItem;
+import com.serjnn.BucketService.dtos.Bucket;
+import com.serjnn.BucketService.dtos.BucketItem;
 import com.serjnn.BucketService.repository.BucketItemRepository;
 import com.serjnn.BucketService.repository.BucketRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class BucketService {
 
     public List<CompleteProduct> getCompleteProducts(long clientId) {
         Bucket bucket = findOrCreateBucket(clientId);
-        List<BucketItem> bucketItems = bucketItemRepository.findAllByBucketId(bucket.getId());
+        List<BucketItem> bucketItems = bucketItemRepository.findAllByBucketId(bucket.id());
 
         if (bucketItems.isEmpty()) {
             return new ArrayList<>();
@@ -83,44 +83,44 @@ public class BucketService {
     public void restore(OrderDTO orderDTO) {
         Bucket bucket = findOrCreateBucket(orderDTO.clientId());
         orderDTO.items().forEach(item -> {
-            bucketItemRepository.addProduct(bucket.getId(), item.id(), item.quantity());
+            bucketItemRepository.addProduct(bucket.id(), item.id(), item.quantity());
         });
     } //todo batch
 
     public void addProduct(long clientId, long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
-        List<BucketItem> items = bucketItemRepository.findAllByBucketId(bucket.getId());
+        List<BucketItem> items = bucketItemRepository.findAllByBucketId(bucket.id());
         Optional<BucketItem> existingItem = items.stream()
-                .filter(item -> item.getProductId() == productId)
+                .filter(item -> item.productId() == productId)
                 .findFirst();
 
         if (existingItem.isPresent()) {
             BucketItem item = existingItem.get();
-            bucketItemRepository.deleteProduct(bucket.getId(), productId);
-            bucketItemRepository.addProduct(bucket.getId(), productId, item.getQuantity() + 1);
+            bucketItemRepository.deleteProduct(bucket.id(), productId);
+            bucketItemRepository.addProduct(bucket.id(), productId, item.quantity() + 1);
         } else {
-            bucketItemRepository.addProduct(bucket.getId(), productId, 1);
+            bucketItemRepository.addProduct(bucket.id(), productId, 1);
         }
     }
 
     public void removeProductFromBucket(long clientId, long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
-        List<BucketItem> items = bucketItemRepository.findAllByBucketId(bucket.getId());
+        List<BucketItem> items = bucketItemRepository.findAllByBucketId(bucket.id());
         Optional<BucketItem> existingItem = items.stream()
-                .filter(item -> item.getProductId() == productId)
+                .filter(item -> item.productId() == productId)
                 .findFirst();
 
         if (existingItem.isPresent()) {
             BucketItem item = existingItem.get();
-            bucketItemRepository.deleteProduct(bucket.getId(), productId);
-            if (item.getQuantity() > 1) {
-                bucketItemRepository.addProduct(bucket.getId(), productId, item.getQuantity() - 1);
+            bucketItemRepository.deleteProduct(bucket.id(), productId);
+            if (item.quantity() > 1) {
+                bucketItemRepository.addProduct(bucket.id(), productId, item.quantity() - 1);
             }
         }
     }
 
     public void clearBucket(long clientId) {
         Bucket bucket = findOrCreateBucket(clientId);
-        bucketItemRepository.clearBucket(bucket.getId());
+        bucketItemRepository.clearBucket(bucket.id());
     }
 }

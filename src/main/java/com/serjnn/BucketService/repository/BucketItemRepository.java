@@ -1,6 +1,6 @@
 package com.serjnn.BucketService.repository;
 
-import com.serjnn.BucketService.models.BucketItem;
+import com.serjnn.BucketService.dtos.BucketItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,7 +20,7 @@ public class BucketItemRepository {
 
     public void deleteAll(List<BucketItem> items) {
         for (BucketItem item : items) {
-            jdbcTemplate.update("DELETE FROM bucket_item WHERE id = ?", item.getId());
+            jdbcTemplate.update("DELETE FROM bucket_item WHERE id = ?", item.id());
         }
     }
 

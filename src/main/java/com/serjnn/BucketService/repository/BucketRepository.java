@@ -1,6 +1,6 @@
 package com.serjnn.BucketService.repository;
 
-import com.serjnn.BucketService.models.Bucket;
+import com.serjnn.BucketService.dtos.Bucket;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;

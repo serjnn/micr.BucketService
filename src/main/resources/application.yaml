@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/bucket-service
+    url: jdbc:postgresql://localhost:5432/micr-synch
     username: qwe
     password: qwe
 
