@@ -1,14 +1,25 @@
 package com.serjnn.BucketService.repository;
 
 import com.serjnn.BucketService.models.Bucket;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import reactor.core.publisher.Mono;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
-public interface BucketRepository extends ReactiveCrudRepository<Bucket, Long> {
+import java.util.Optional;
 
-    Mono<Bucket> findBucketByClientId(Long clientId);
+@Repository
+@RequiredArgsConstructor
+public class BucketRepository {
 
+    private final JdbcTemplate jdbcTemplate;
 
+    public Optional<Bucket> findBucketByClientId(Long clientId) {
+        return jdbcTemplate.query("SELECT * FROM bucket WHERE client_id = ?", new BeanPropertyRowMapper<>(Bucket.class), clientId)
+                .stream().findFirst();
+    }
 
-
+    public void createBucket(long clientId) {
+        jdbcTemplate.update("INSERT INTO bucket (client_id) VALUES (?)", clientId);
+    }
 }

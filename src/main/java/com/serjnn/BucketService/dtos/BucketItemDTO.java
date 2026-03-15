@@ -1,14 +1,6 @@
 package com.serjnn.BucketService.dtos;
 
-import lombok.Getter;
-
 import java.math.BigDecimal;
 
-@Getter
-public class BucketItemDTO {
-
-    private long id;
-    private String name;
-    private int quantity;
-    private BigDecimal price;
+public record BucketItemDTO(long id, String name, int quantity, BigDecimal price) {
 }

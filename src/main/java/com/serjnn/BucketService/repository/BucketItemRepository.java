@@ -1,19 +1,38 @@
 package com.serjnn.BucketService.repository;
 
 import com.serjnn.BucketService.models.BucketItem;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface BucketItemRepository extends ReactiveCrudRepository<BucketItem, Long> {
+@Repository
+@RequiredArgsConstructor
+public class BucketItemRepository {
 
-    Flux<BucketItem> findAllByBucketId(Long bucketId);
+    private final JdbcTemplate jdbcTemplate;
 
-    Mono<Void> deleteAll(List<BucketItem> items);
+    public List<BucketItem> findAllByBucketId(Long bucketId) {
+        return jdbcTemplate.query("SELECT * FROM bucket_item WHERE bucket_id = ?", new BeanPropertyRowMapper<>(BucketItem.class), bucketId);
+    }
 
-    Mono<BucketItem> findByBucketId(long bucketId);
+    public void deleteAll(List<BucketItem> items) {
+        for (BucketItem item : items) {
+            jdbcTemplate.update("DELETE FROM bucket_item WHERE id = ?", item.getId());
+        }
+    }
 
+    public void addProduct(long bucketId, long productId, int quantity) {
+        jdbcTemplate.update("INSERT INTO bucket_item (bucket_id, product_id, quantity) VALUES (?, ?, ?)", bucketId, productId, quantity);
+    }
 
+    public void deleteProduct(long bucketId, long productId) {
+        jdbcTemplate.update("DELETE FROM bucket_item WHERE bucket_id = ? AND product_id = ?", bucketId, productId);
+    }
+
+    public void clearBucket(long bucketId) {
+        jdbcTemplate.update("DELETE FROM bucket_item WHERE bucket_id = ?", bucketId);
+    }
 }

@@ -1,17 +1,12 @@
-
 spring:
-  r2dbc:
+  datasource:
     driver-class-name: org.postgresql.Driver
-    url: r2dbc:postgresql://localhost:5432/bucket
-    username: postgres
-    password: Vaifery111
+    url: jdbc:postgresql://localhost:5432/bucket-service
+    username: qwe
+    password: qwe
 
   application:
     name: Bucket
 
-
 server:
   port: 7001
-
-
-
