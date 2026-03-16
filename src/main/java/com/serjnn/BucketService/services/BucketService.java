@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,10 +46,12 @@ public class BucketService {
                 new ParameterizedTypeReference<List<ProductDto>>() {}
         );
 
-        List<ProductDto> productDtos = response.getBody();
-        if (productDtos == null) {
+        if (response == null || response.getBody() == null) {
             return new ArrayList<>();
         }
+
+        List<ProductDto> productDtos = response.getBody();
+
 
         return productDtos.stream().map(product -> {
             int quantity = bucketItems.stream()
@@ -72,13 +73,22 @@ public class BucketService {
 
     private Bucket findOrCreateBucket(Long clientId) {
         return bucketRepository.findBucketByClientId(clientId)
-                .orElseGet(() -> bucketRepository.createBucket(clientId));
+                .orElseGet(() -> {
+                    try {
+                        return bucketRepository.createBucket(clientId);
+                    } catch (Exception e) {
+                        // In case of a race condition where another thread created it
+                        return bucketRepository.findBucketByClientId(clientId)
+                                .orElseThrow(() -> new RuntimeException(
+                                        "Bucket could not be found or created", e));
+                    }
+                });
     }
 
     /**
      * Restores the bucket items from a previous order.
      * This method is part of the SAGA pattern logic for order compensation.
-     * 
+     *
      * @param orderDTO The order data transfer object containing items to restore.
      */
     public void restore(OrderDto orderDTO) {
@@ -90,28 +100,12 @@ public class BucketService {
 
     public void addProduct(Long clientId, Long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
-        Optional<BucketItem> existingItem = bucketItemRepository.findByBucketIdAndProductId(bucket.id(), productId);
-
-        if (existingItem.isPresent()) {
-            BucketItem item = existingItem.get();
-            bucketItemRepository.updateQuantity(bucket.id(), productId, item.quantity() + 1);
-        } else {
-            bucketItemRepository.addProduct(bucket.id(), productId, 1);
-        }
+        bucketItemRepository.addProduct(bucket.id(), productId, 1);
     }
 
     public void removeProductFromBucket(Long clientId, Long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
-        Optional<BucketItem> existingItem = bucketItemRepository.findByBucketIdAndProductId(bucket.id(), productId);
-
-        if (existingItem.isPresent()) {
-            BucketItem item = existingItem.get();
-            if (item.quantity() > 1) {
-                bucketItemRepository.updateQuantity(bucket.id(), productId, item.quantity() - 1);
-            } else {
-                bucketItemRepository.deleteProduct(bucket.id(), productId);
-            }
-        }
+        bucketItemRepository.decrementOrDelete(bucket.id(), productId);
     }
 
     public void clearBucket(Long clientId) {
