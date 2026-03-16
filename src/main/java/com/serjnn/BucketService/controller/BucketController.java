@@ -45,7 +45,7 @@ public class BucketController {
     }
 
     @PostMapping("/restore")
-    @Operation(summary = "Restore the bucket", description = "Restores the bucket from a previous order")
+    @Operation(summary = "Restore the bucket (SAGA Compensation)", description = "Restores the bucket from a previous order as part of SAGA compensation logic.")
     public void restoreBucket(@RequestBody OrderDTO orderDTO) {
         bucketService.restore(orderDTO);
     }

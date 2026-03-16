@@ -75,6 +75,12 @@ public class BucketService {
                 .orElseGet(() -> bucketRepository.createBucket(clientId));
     }
 
+    /**
+     * Restores the bucket items from a previous order.
+     * This method is part of the SAGA pattern logic for order compensation.
+     * 
+     * @param orderDTO The order data transfer object containing items to restore.
+     */
     public void restore(OrderDTO orderDTO) {
         Bucket bucket = findOrCreateBucket(orderDTO.clientId());
         if (orderDTO.items() != null && !orderDTO.items().isEmpty()) {
