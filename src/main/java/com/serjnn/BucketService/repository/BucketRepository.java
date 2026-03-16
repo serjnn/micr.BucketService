@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,7 +24,8 @@ public class BucketRepository {
                 .stream().findFirst();
     }
 
-    public Bucket createBucket(long clientId) {
+
+    public Bucket createBucket(Long clientId) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
@@ -34,7 +36,7 @@ public class BucketRepository {
             return ps;
         }, keyHolder);
 
-        long generatedId = keyHolder.getKey().longValue();
+        Long generatedId = keyHolder.getKey().longValue();
         return new Bucket(generatedId, clientId);
     }
 }

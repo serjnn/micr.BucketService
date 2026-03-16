@@ -28,7 +28,7 @@ public class BucketService {
     private final RestTemplate restTemplate;
     private final BucketItemRepository bucketItemRepository;
 
-    public List<CompleteProduct> getCompleteProducts(long clientId) {
+    public List<CompleteProduct> getCompleteProducts(Long clientId) {
         Bucket bucket = findOrCreateBucket(clientId);
         List<BucketItem> bucketItems = bucketItemRepository.findAllByBucketId(bucket.id());
 
@@ -54,7 +54,7 @@ public class BucketService {
 
         return productDtos.stream().map(product -> {
             int quantity = bucketItems.stream()
-                    .filter(item -> item.productId() == product.id())
+                    .filter(item -> item.productId().equals(product.id()))
                     .findFirst()
                     .map(BucketItem::quantity)
                     .orElse(0);
@@ -70,9 +70,9 @@ public class BucketService {
         }).toList();
     }
 
-    private Bucket findOrCreateBucket(long clientId) {
-        Optional<Bucket> existingBucket = bucketRepository.findBucketByClientId(clientId);
-        return existingBucket.orElseGet(() -> bucketRepository.createBucket(clientId));
+    private Bucket findOrCreateBucket(Long clientId) {
+        return bucketRepository.findBucketByClientId(clientId)
+                .orElseGet(() -> bucketRepository.createBucket(clientId));
     }
 
     public void restore(OrderDTO orderDTO) {
@@ -82,7 +82,7 @@ public class BucketService {
         }
     }
 
-    public void addProduct(long clientId, long productId) {
+    public void addProduct(Long clientId, Long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
         Optional<BucketItem> existingItem = bucketItemRepository.findByBucketIdAndProductId(bucket.id(), productId);
 
@@ -94,7 +94,7 @@ public class BucketService {
         }
     }
 
-    public void removeProductFromBucket(long clientId, long productId) {
+    public void removeProductFromBucket(Long clientId, Long productId) {
         Bucket bucket = findOrCreateBucket(clientId);
         Optional<BucketItem> existingItem = bucketItemRepository.findByBucketIdAndProductId(bucket.id(), productId);
 
@@ -108,7 +108,7 @@ public class BucketService {
         }
     }
 
-    public void clearBucket(long clientId) {
+    public void clearBucket(Long clientId) {
         Bucket bucket = findOrCreateBucket(clientId);
         bucketItemRepository.clearBucket(bucket.id());
     }

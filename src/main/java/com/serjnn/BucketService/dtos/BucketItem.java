@@ -5,8 +5,5 @@ public record BucketItem(
     Long bucketId,
     Long productId,
     Integer quantity
-) {
-    public BucketItem(Long bucketId, Long productId, Integer quantity) {
-        this(0L, bucketId, productId, quantity);
-    }
-}
+) {}
+

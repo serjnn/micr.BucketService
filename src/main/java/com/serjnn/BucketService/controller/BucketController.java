@@ -12,41 +12,41 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/buckets")
 @Tag(name = "Bucket Controller", description = "API for managing user buckets")
 public class BucketController {
 
     private final BucketService bucketService;
 
-    @GetMapping("/addProduct/{clientId}/{productId}")
+    @PostMapping("/{clientId}/products/{productId}")
     @Operation(summary = "Add a product to the bucket", description = "Adds a product to the specified client's bucket")
-    public void add(@PathVariable("clientId") long clientId,
-                    @PathVariable("productId") long productId) {
+    public void addProductToBucket(@PathVariable("clientId") Long clientId,
+                                   @PathVariable("productId") Long productId) {
         bucketService.addProduct(clientId, productId);
     }
 
-    @GetMapping("/removeProduct/{clientId}/{productId}")
+    @DeleteMapping("/{clientId}/products/{productId}")
     @Operation(summary = "Remove a product from the bucket", description = "Removes a product from the specified client's bucket")
-    public void remove(@PathVariable long clientId,
-                       @PathVariable long productId) {
+    public void removeProductFromBucket(@PathVariable Long clientId,
+                                        @PathVariable Long productId) {
         bucketService.removeProductFromBucket(clientId, productId);
     }
 
-    @GetMapping("/getCompleteBucket/{clientId}")
+    @GetMapping("/{clientId}")
     @Operation(summary = "Get the complete bucket", description = "Retrieves all products in the specified client's bucket")
-    public List<CompleteProduct> complete(@PathVariable("clientId") long clientId) {
+    public List<CompleteProduct> getBucketContents(@PathVariable("clientId") Long clientId) {
         return bucketService.getCompleteProducts(clientId);
     }
 
-    @PostMapping("/clearBucket")
+    @DeleteMapping("/{clientId}")
     @Operation(summary = "Clear the bucket", description = "Removes all products from the specified client's bucket")
-    public void clear(@RequestBody long clientId) {
+    public void clearBucket(@PathVariable Long clientId) {
         bucketService.clearBucket(clientId);
     }
 
-    @PostMapping("/restoreBucket")
+    @PostMapping("/restore")
     @Operation(summary = "Restore the bucket", description = "Restores the bucket from a previous order")
-    public void restore(@RequestBody OrderDTO orderDTO) {
+    public void restoreBucket(@RequestBody OrderDTO orderDTO) {
         bucketService.restore(orderDTO);
     }
 }
