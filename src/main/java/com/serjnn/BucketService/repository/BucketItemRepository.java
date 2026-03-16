@@ -1,7 +1,7 @@
 package com.serjnn.BucketService.repository;
 
-import com.serjnn.BucketService.dtos.BucketItem;
-import com.serjnn.BucketService.dtos.BucketItemDTO;
+import com.serjnn.BucketService.model.BucketItem;
+import com.serjnn.BucketService.dtos.BucketItemRestoredDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,7 +35,7 @@ public class BucketItemRepository {
         jdbcTemplate.update("INSERT INTO bucket_item (bucket_id, product_id, quantity) VALUES (?, ?, ?)", bucketId, productId, quantity);
     }
 
-    public void batchInsert(long bucketId, List<BucketItemDTO> items) {
+    public void restoreBatchInsert(long bucketId, List<BucketItemRestoredDto> items) {
         jdbcTemplate.batchUpdate("INSERT INTO bucket_item (bucket_id, product_id, quantity) VALUES (?, ?, ?)",
                 items,
                 items.size(),

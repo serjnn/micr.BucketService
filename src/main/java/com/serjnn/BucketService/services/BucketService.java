@@ -1,10 +1,10 @@
 package com.serjnn.BucketService.services;
 
-import com.serjnn.BucketService.dtos.CompleteProduct;
-import com.serjnn.BucketService.dtos.OrderDTO;
+import com.serjnn.BucketService.dtos.CompleteProductDto;
+import com.serjnn.BucketService.dtos.OrderDto;
 import com.serjnn.BucketService.dtos.ProductDto;
-import com.serjnn.BucketService.dtos.Bucket;
-import com.serjnn.BucketService.dtos.BucketItem;
+import com.serjnn.BucketService.model.Bucket;
+import com.serjnn.BucketService.model.BucketItem;
 import com.serjnn.BucketService.repository.BucketItemRepository;
 import com.serjnn.BucketService.repository.BucketRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class BucketService {
     private final RestTemplate restTemplate;
     private final BucketItemRepository bucketItemRepository;
 
-    public List<CompleteProduct> getCompleteProducts(Long clientId) {
+    public List<CompleteProductDto> getCompleteProducts(Long clientId) {
         Bucket bucket = findOrCreateBucket(clientId);
         List<BucketItem> bucketItems = bucketItemRepository.findAllByBucketId(bucket.id());
 
@@ -59,7 +59,7 @@ public class BucketService {
                     .map(BucketItem::quantity)
                     .orElse(0);
 
-            return new CompleteProduct(
+            return new CompleteProductDto(
                     product.id(),
                     quantity,
                     product.name(),
@@ -81,10 +81,10 @@ public class BucketService {
      * 
      * @param orderDTO The order data transfer object containing items to restore.
      */
-    public void restore(OrderDTO orderDTO) {
+    public void restore(OrderDto orderDTO) {
         Bucket bucket = findOrCreateBucket(orderDTO.clientId());
         if (orderDTO.items() != null && !orderDTO.items().isEmpty()) {
-            bucketItemRepository.batchInsert(bucket.id(), orderDTO.items());
+            bucketItemRepository.restoreBatchInsert(bucket.id(), orderDTO.items());
         }
     }
 

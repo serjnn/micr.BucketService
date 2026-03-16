@@ -1,7 +1,7 @@
 package com.serjnn.BucketService.controller;
 
-import com.serjnn.BucketService.dtos.CompleteProduct;
-import com.serjnn.BucketService.dtos.OrderDTO;
+import com.serjnn.BucketService.dtos.CompleteProductDto;
+import com.serjnn.BucketService.dtos.OrderDto;
 import com.serjnn.BucketService.services.BucketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +34,7 @@ public class BucketController {
 
     @GetMapping("/{clientId}")
     @Operation(summary = "Get the complete bucket", description = "Retrieves all products in the specified client's bucket")
-    public List<CompleteProduct> getBucketContents(@PathVariable("clientId") Long clientId) {
+    public List<CompleteProductDto> getBucketContents(@PathVariable("clientId") Long clientId) {
         return bucketService.getCompleteProducts(clientId);
     }
 
@@ -46,7 +46,7 @@ public class BucketController {
 
     @PostMapping("/restore")
     @Operation(summary = "Restore the bucket (SAGA Compensation)", description = "Restores the bucket from a previous order as part of SAGA compensation logic.")
-    public void restoreBucket(@RequestBody OrderDTO orderDTO) {
+    public void restoreBucket(@RequestBody OrderDto orderDTO) {
         bucketService.restore(orderDTO);
     }
 }
