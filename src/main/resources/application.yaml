@@ -2,8 +2,14 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/micr-synch
-    username: qwe
-    password: qwe
+    username: ${POSTGRES_USER:qwe}
+    password: ${POSTGRES_PASSWORD:qwe}
+
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    enabled: true
 
   application:
     name: Bucket
@@ -13,7 +19,3 @@ server:
 
 
 
-flyway:
-  locations: classpath:db/migration
-  enabled: true
-  baseline-on-migrate: true
