@@ -8,6 +8,7 @@ import com.serjnn.BucketService.model.BucketItem;
 import com.serjnn.BucketService.repository.BucketItemRepository;
 import com.serjnn.BucketService.repository.BucketRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -27,6 +28,9 @@ public class BucketService {
     private final RestTemplate restTemplate;
     private final BucketItemRepository bucketItemRepository;
 
+    @Value("${services.product.url}")
+    private String productServiceUrl;
+
     public List<CompleteProductDto> getCompleteProducts(Long clientId) {
         Bucket bucket = findOrCreateBucket(clientId);
         List<BucketItem> bucketItems = bucketItemRepository.findAllByBucketId(bucket.id());
@@ -40,7 +44,7 @@ public class BucketService {
         requestBody.put("ids", productIds);
 
         ResponseEntity<List<ProductDto>> response = restTemplate.exchange(
-                "http://product/api/v1/all/by-ids",
+                productServiceUrl,
                 HttpMethod.POST,
                 new HttpEntity<>(requestBody),
                 new ParameterizedTypeReference<List<ProductDto>>() {}

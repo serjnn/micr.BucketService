@@ -1,7 +1,7 @@
 spring:
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/micr-synch
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:micr-synch}}
     username: ${POSTGRES_USER:qwe}
     password: ${POSTGRES_PASSWORD:qwe}
 
@@ -9,13 +9,31 @@ spring:
     url: ${spring.datasource.url}
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
-    enabled: true
+    enabled: ${FLYWAY_ENABLED:true}
 
   application:
-    name: Bucket
+    name: ${APP_NAME:Bucket}
+
+services:
+  product:
+    url: ${PRODUCT_SERVICE_URL:http://product/api/v1/products/by-ids}
 
 server:
-  port: 7001
+  port: ${PORT:7001}
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH:true}
+  instance:
+    instance-id: ${spring.application.name}:${server.port}:${random.value}
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
 
-
+springdoc:
+  api-docs:
+    path: ${API_DOCS_PATH:/v3/api-docs}
+  swagger-ui:
+    path: ${SWAGGER_UI_PATH:/swagger-ui.html}
+    enabled: ${SWAGGER_ENABLED:true}
