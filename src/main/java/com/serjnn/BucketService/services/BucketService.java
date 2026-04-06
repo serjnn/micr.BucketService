@@ -8,6 +8,7 @@ import com.serjnn.BucketService.model.BucketItem;
 import com.serjnn.BucketService.repository.BucketItemRepository;
 import com.serjnn.BucketService.repository.BucketRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BucketService {
     private final BucketRepository bucketRepository;
     private final RestTemplate restTemplate;
@@ -32,14 +34,17 @@ public class BucketService {
     private String productServiceUrl;
 
     public List<CompleteProductDto> getCompleteProducts(Long clientId) {
+        log.info("Fetching complete products for client {}", clientId);
         Bucket bucket = findOrCreateBucket(clientId);
         List<BucketItem> bucketItems = bucketItemRepository.findAllByBucketId(bucket.id());
 
         if (bucketItems.isEmpty()) {
+            log.info("Bucket is empty for client {}", clientId);
             return new ArrayList<>();
         }
 
         List<Long> productIds = bucketItems.stream().map(BucketItem::productId).toList();
+        log.debug("Found {} items in bucket for client {}. Fetching details from Product Service.", productIds.size(), clientId);
         Map<String, List<Long>> requestBody = new HashMap<>();
         requestBody.put("ids", productIds);
 
@@ -51,11 +56,12 @@ public class BucketService {
         );
 
         if (response == null || response.getBody() == null) {
+            log.warn("Received empty response from Product Service for product ids: {}", productIds);
             return new ArrayList<>();
         }
 
         List<ProductDto> productDtos = response.getBody();
-
+        log.info("Successfully fetched details for {} products", productDtos.size());
 
         return productDtos.stream().map(product -> {
             int quantity = bucketItems.stream()
@@ -78,13 +84,17 @@ public class BucketService {
     private Bucket findOrCreateBucket(Long clientId) {
         return bucketRepository.findBucketByClientId(clientId)
                 .orElseGet(() -> {
+                    log.info("Bucket not found for client {}. Creating new bucket.", clientId);
                     try {
                         return bucketRepository.createBucket(clientId);
                     } catch (Exception e) {
+                        log.warn("Conflict while creating bucket for client {}. Attempting to find again.", clientId);
                         // In case of a race condition where another thread created it
                         return bucketRepository.findBucketByClientId(clientId)
-                                .orElseThrow(() -> new RuntimeException(
-                                        "Bucket could not be found or created", e));
+                                .orElseThrow(() -> {
+                                    log.error("Failed to create or find bucket for client {}", clientId);
+                                    return new RuntimeException("Bucket could not be found or created", e);
+                                });
                     }
                 });
     }
@@ -96,24 +106,34 @@ public class BucketService {
      * @param orderDTO The order data transfer object containing items to restore.
      */
     public void restore(OrderDto orderDTO) {
+        log.info("Restoring bucket for client {} from order {}", orderDTO.clientId(), orderDTO.orderId());
         Bucket bucket = findOrCreateBucket(orderDTO.clientId());
         if (orderDTO.items() != null && !orderDTO.items().isEmpty()) {
+            log.debug("Restoring {} items to bucket {}", orderDTO.items().size(), bucket.id());
             bucketItemRepository.restoreBatchInsert(bucket.id(), orderDTO.items());
+        } else {
+            log.info("No items to restore for client {}", orderDTO.clientId());
         }
     }
 
     public void addProduct(Long clientId, Long productId) {
+        log.info("Adding product {} to bucket for client {}", productId, clientId);
         Bucket bucket = findOrCreateBucket(clientId);
         bucketItemRepository.addProduct(bucket.id(), productId, 1);
+        log.debug("Product {} added to bucket {}", productId, bucket.id());
     }
 
     public void removeProductFromBucket(Long clientId, Long productId) {
+        log.info("Removing product {} from bucket for client {}", productId, clientId);
         Bucket bucket = findOrCreateBucket(clientId);
         bucketItemRepository.decrementOrDelete(bucket.id(), productId);
+        log.debug("Product {} removed or decremented in bucket {}", productId, bucket.id());
     }
 
     public void clearBucket(Long clientId) {
+        log.info("Clearing bucket for client {}", clientId);
         Bucket bucket = findOrCreateBucket(clientId);
         bucketItemRepository.clearBucket(bucket.id());
+        log.debug("Bucket {} cleared", bucket.id());
     }
 }
