@@ -6,7 +6,7 @@ services:
     image: postgres:15
     container_name: postgres_db
     environment:
-      POSTGRES_DB: micr-synch  # From application.yaml
+      POSTGRES_DB: micr-db  # From application.yaml
       POSTGRES_USER: qwe          # From application.yaml
       POSTGRES_PASSWORD: qwe      # From application.yaml
     ports:
