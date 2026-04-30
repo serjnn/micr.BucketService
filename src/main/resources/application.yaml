@@ -15,6 +15,18 @@ spring:
   application:
     name: ${APP_NAME:bucket}
 
+resilience4j:
+  retry:
+    instances:
+      productService:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - org.springframework.web.client.RestClientException
+          - java.io.IOException
+
 management:
   tracing:
     sampling:

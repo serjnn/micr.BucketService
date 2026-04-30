@@ -7,6 +7,7 @@ import com.serjnn.BucketService.model.Bucket;
 import com.serjnn.BucketService.model.BucketItem;
 import com.serjnn.BucketService.repository.BucketItemRepository;
 import com.serjnn.BucketService.repository.BucketRepository;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ public class BucketService {
     @Value("${services.product.url}")
     private String productServiceUrl;
 
+    @Retry(name = "productService")
     public List<CompleteProductDto> getCompleteProducts(Long clientId) {
         log.info("Fetching complete products for client {}", clientId);
         Bucket bucket = findOrCreateBucket(clientId);
