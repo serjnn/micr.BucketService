@@ -17,8 +17,8 @@ spring:
 
 resilience4j:
   retry:
-    instances:
-      productService:
+    configs:
+      default:
         maxAttempts: 3
         waitDuration: 1s
         enableExponentialBackoff: true
@@ -26,6 +26,9 @@ resilience4j:
         retryExceptions:
           - org.springframework.web.client.RestClientException
           - java.io.IOException
+    instances:
+      productService:
+        baseConfig: default
 
 management:
   tracing:

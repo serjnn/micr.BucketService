@@ -7,21 +7,13 @@ import com.serjnn.BucketService.model.Bucket;
 import com.serjnn.BucketService.model.BucketItem;
 import com.serjnn.BucketService.repository.BucketItemRepository;
 import com.serjnn.BucketService.repository.BucketRepository;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +22,9 @@ public class BucketService {
     private final BucketRepository bucketRepository;
     private final RestTemplate restTemplate;
     private final BucketItemRepository bucketItemRepository;
+    private final ProductsOfBucketFetcher productsOfBucketFetcher;
 
-    @Value("${services.product.url}")
-    private String productServiceUrl;
 
-    @Retry(name = "productService")
     public List<CompleteProductDto> getCompleteProducts(Long clientId) {
         log.info("Fetching complete products for client {}", clientId);
         Bucket bucket = findOrCreateBucket(clientId);
@@ -46,24 +36,11 @@ public class BucketService {
         }
 
         List<Long> productIds = bucketItems.stream().map(BucketItem::productId).toList();
-        log.debug("Found {} items in bucket for client {}. Fetching details from Product Service.", productIds.size(), clientId);
-        Map<String, List<Long>> requestBody = new HashMap<>();
-        requestBody.put("ids", productIds);
 
-        ResponseEntity<List<ProductDto>> response = restTemplate.exchange(
-                productServiceUrl,
-                HttpMethod.POST,
-                new HttpEntity<>(requestBody),
-                new ParameterizedTypeReference<List<ProductDto>>() {}
-        );
+        log.info("Calling product service to fetch details for {} products", productIds.size());
+        List<ProductDto> productDtos = productsOfBucketFetcher.retrieveProducts(productIds);
 
-        if (response == null || response.getBody() == null) {
-            log.warn("Received empty response from Product Service for product ids: {}", productIds);
-            return new ArrayList<>();
-        }
 
-        List<ProductDto> productDtos = response.getBody();
-        log.info("Successfully fetched details for {} products", productDtos.size());
 
         return productDtos.stream().map(product -> {
             int quantity = bucketItems.stream()
