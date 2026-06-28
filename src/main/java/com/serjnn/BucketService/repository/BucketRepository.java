@@ -1,6 +1,6 @@
 package com.serjnn.BucketService.repository;
 
-import com.serjnn.BucketService.models.Bucket;
+import com.serjnn.BucketService.model.Bucket;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;
 

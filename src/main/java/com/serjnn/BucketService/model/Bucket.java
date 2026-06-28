@@ -1,4 +1,4 @@
-package com.serjnn.BucketService.models;
+package com.serjnn.BucketService.model;
 
 
 import lombok.Getter;
