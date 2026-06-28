@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS bucket (
+    id BIGSERIAL PRIMARY KEY,
+    client_id BIGINT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS bucket_item (
+    id BIGSERIAL PRIMARY KEY,
+    bucket_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    quantity INTEGER NOT NULL
+);
