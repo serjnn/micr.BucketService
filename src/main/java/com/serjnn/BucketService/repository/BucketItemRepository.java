@@ -1,7 +1,7 @@
 package com.serjnn.BucketService.repository;
 
 import com.serjnn.BucketService.model.BucketItem;
-import com.serjnn.BucketService.dtos.BucketItemRestoredDto;
+import com.serjnn.BucketService.dto.BucketItemRestoredDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;

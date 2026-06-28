@@ -1,4 +1,4 @@
-package com.serjnn.BucketService.dtos;
+package com.serjnn.BucketService.dto;
 
 import java.math.BigDecimal;
 import java.util.List;

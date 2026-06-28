@@ -1,6 +1,6 @@
-package com.serjnn.BucketService.services;
+package com.serjnn.BucketService.service;
 
-import com.serjnn.BucketService.dtos.ProductDto;
+import com.serjnn.BucketService.dto.ProductDto;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

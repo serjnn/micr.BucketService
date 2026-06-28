@@ -1,8 +1,8 @@
-package com.serjnn.BucketService.services;
+package com.serjnn.BucketService.service;
 
-import com.serjnn.BucketService.dtos.CompleteProductDto;
-import com.serjnn.BucketService.dtos.OrderDto;
-import com.serjnn.BucketService.dtos.ProductDto;
+import com.serjnn.BucketService.dto.CompleteProductDto;
+import com.serjnn.BucketService.dto.OrderDto;
+import com.serjnn.BucketService.dto.ProductDto;
 import com.serjnn.BucketService.model.Bucket;
 import com.serjnn.BucketService.model.BucketItem;
 import com.serjnn.BucketService.repository.BucketItemRepository;

@@ -1,8 +1,8 @@
 package com.serjnn.BucketService.controller;
 
-import com.serjnn.BucketService.dtos.CompleteProductDto;
-import com.serjnn.BucketService.dtos.OrderDto;
-import com.serjnn.BucketService.services.BucketService;
+import com.serjnn.BucketService.dto.CompleteProductDto;
+import com.serjnn.BucketService.dto.OrderDto;
+import com.serjnn.BucketService.service.BucketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
